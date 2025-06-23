@@ -12,7 +12,7 @@ export function Header() {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">CG</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">ContentGen</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">CleverGen</span>
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
@@ -27,7 +27,7 @@ export function Header() {
             </Link>
           </nav>
 
-          <ThemeToggle />
+         
         </div>
       </div>
     </header>

@@ -74,7 +74,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose ContentGen?
+              Why Choose CleverGen?
             </h2>
           </div>
 
@@ -113,10 +113,10 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">CG</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">ContentGen</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">CleverGen</span>
           </div>
           <p className="text-gray-600 dark:text-gray-300">
-            © 2025 ContentGen. All rights reserved.
+            © 2025 CleverGen. All rights reserved.
           </p>
         </div>
       </footer>
