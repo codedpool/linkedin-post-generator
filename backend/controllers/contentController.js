@@ -1,10 +1,5 @@
 const { Groq } = require('groq-sdk');
 
-// Initialize Groq with API key
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 // Enhanced prompt for LinkedIn short text
 const getShortTextPrompt = (userInput) => `
 You are a LinkedIn content expert creating professional, informational posts. Write a LinkedIn post based on the user's input: "${userInput}". Follow these guidelines:
@@ -32,6 +27,11 @@ exports.generateShortText = async (req, res) => {
     return res.status(400).json({ error: 'Valid user input is required' });
   }
 
+  // Initialize Groq inside the function
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
@@ -40,11 +40,11 @@ exports.generateShortText = async (req, res) => {
           content: getShortTextPrompt(userInput.trim()),
         },
       ],
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct', // Adjust model if needed
-      temperature: 0.7, // Lower temperature for consistent tone
-      max_completion_tokens: 200, // Limit to ~150 words
-      top_p: 0.9, // Slightly reduce randomness
-      stream: false, // Non-streaming for simplicity
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      temperature: 0.7,
+      max_completion_tokens: 200,
+      top_p: 0.9,
+      stream: false,
       stop: null,
     });
 
