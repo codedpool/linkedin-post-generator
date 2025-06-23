@@ -15,22 +15,24 @@ export default function LinkedInGenerator() {
     setIsGenerating(true);
     
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/generate-linkedin-post', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ text: inputText }),
-      // });
-      // const data = await response.json();
-      // setGeneratedPost(data.post);
-      
-      // Placeholder for now - remove when API is ready
-      console.log('API call will be implemented here with input:', inputText);
+      const response = await fetch('http://localhost:5000/api/short-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userInput: inputText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch from API');
+      }
+
+      const data = await response.json();
+      setGeneratedPost(data.content || 'No content generated');
       
     } catch (error) {
       console.error('Error generating LinkedIn post:', error);
+      setGeneratedPost('Failed to generate post. Please try again.');
     } finally {
       setIsGenerating(false);
     }
