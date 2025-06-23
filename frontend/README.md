@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Generator Web App
 
-## Getting Started
+A simple yet extensible **Next.js App Router project** with a central landing page that links to two mini-tools:
 
-First, run the development server:
+- ✍️ **Text Generator**
+- 🎠 **Carousel Generator**
+
+Built using the latest features of **Next.js 14**, this project is ideal as a foundation for AI tools, internal dashboards, or creative utilities.
+
+---
+
+## 📁 Project Structure
+
+frontend/
+└── src/
+├── app/
+│ ├── page.tsx # Landing Page ('/')
+│ ├── carousel-generator/
+│ │ └── page.tsx # Carousel Generator ('/carousel-generator')
+│ └── linkedin-generator/
+│ └── page.tsx # LinkedIn Post Generator ('/linkedin-generator')
+├── components/
+│ ├── FloatingCarousel.tsx # Optional carousel component
+│ ├── Header.tsx # Navigation/Header UI
+│ ├── ThemeProvider.tsx # Theme context provider
+│ └── ThemeToggle.tsx # Button for light/dark switch
+├── public/
+│ └── favicon.ico
+├── styles/
+│ └── globals.css # Global CSS styles
+├── layout.tsx # Root layout component
+├── tailwind.config.ts
+├── postcss.config.mjs
+├── next.config.ts
+├── tsconfig.json
+├── .eslintrc.mjs
+├── .gitignore
+├── README.md
+
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 
 ```bash
+git clone https://github.com/your-username/generator-app.git
+cd frontend
+
+2. Install Dependencies
+npm install
+# or
+yarn
+
+3. Run the Development Server
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 in your browser to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🌐 Routes
+| Route                 | Description                     |
+| --------------------- | ------------------------------- |
+| `/`                   | Landing Page                    |
+| `/linkedin-generator` | Text Generator (LinkedIn Posts) |
+| `/carousel-generator` | Carousel Generator Page         |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🛠 Tech Stack
 
-## Learn More
+Next.js 14+ (App Router)
 
-To learn more about Next.js, take a look at the following resources:
+React
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+TypeScript
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tailwind CSS
 
-## Deploy on Vercel
+PostCSS
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built with ❤️ by 🐢
