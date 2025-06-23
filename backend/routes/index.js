@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const contentController = require('../controllers/contentController');
 
-// Controller
-const exampleController = require('../controllers/exampleController');
-
-router.get('/', exampleController.home);
+router.post('/short-text', contentController.generateShortText);
 
 module.exports = router;
