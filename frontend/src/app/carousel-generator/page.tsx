@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
+import jsPDF from 'jspdf';
 
 interface CarouselTemplate {
   id: string;
@@ -10,6 +11,7 @@ interface CarouselTemplate {
   description: string;
   preview: string;
   style: string;
+  color: string;
 }
 
 const templates: CarouselTemplate[] = [
@@ -18,33 +20,38 @@ const templates: CarouselTemplate[] = [
     name: 'Modern Professional',
     description: 'Clean, minimalist design perfect for business content',
     preview: '📊',
-    style: 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 border-l-4 border-blue-500'
+    style: 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 border-l-4 border-blue-500',
+    color: '#3B82F6' // Blue-500 for PDF accents
   },
   {
     id: 'creative',
     name: 'Creative Vibrant',
     description: 'Colorful and engaging for creative industries',
     preview: '🎨',
-    style: 'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900 dark:to-pink-800 border-l-4 border-purple-500'
+    style: 'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900 dark:to-pink-800 border-l-4 border-purple-500',
+    color: '#A855F7' // Purple-500 for PDF accents
   },
   {
     id: 'minimal',
     name: 'Minimal Clean',
     description: 'Simple and elegant for focused messaging',
     preview: '✨',
-    style: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-700 dark:to-slate-600 border-l-4 border-gray-500'
+    style: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-700 dark:to-slate-600 border-l-4 border-gray-500',
+    color: '#6B7280' // Gray-500 for PDF accents
   },
   {
     id: 'tech',
     name: 'Tech Modern',
     description: 'Perfect for technology and startup content',
     preview: '💻',
-    style: 'bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-900 dark:to-teal-800 border-l-4 border-cyan-500'
+    style: 'bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-900 dark:to-teal-800 border-l-4 border-cyan-500',
+    color: '#06B6D4' // Cyan-500 for PDF accents
   }
 ];
 
 export default function CarouselGenerator() {
   const [inputText, setInputText] = useState('');
+  const [pageCount, setPageCount] = useState(3); // Default to 3 slides
   const [generatedSlides, setGeneratedSlides] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -52,30 +59,38 @@ export default function CarouselGenerator() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedSlides, setEditedSlides] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const generateCarousel = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || pageCount < 1 || pageCount > 10) return;
     
     setIsGenerating(true);
     
     try {
-      // Simulate API call with mock data for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockSlides = [
-        `🚀 ${inputText}\n\nSlide 1: Introduction\n\nThis is the opening slide that introduces your main topic and hooks your audience.`,
-        `💡 Key Point #1\n\nHere's the first major insight or tip related to your topic. Make it actionable and valuable.`,
-        `📈 Key Point #2\n\nThe second important point that builds on the first. Include specific examples or data when possible.`,
-        `🎯 Key Point #3\n\nYour third main point that adds depth to your message. Keep it focused and relevant.`,
-        `✅ Conclusion\n\nWrap up with a clear call-to-action or summary. Encourage engagement and discussion.`
-      ];
-      
-      setGeneratedSlides(mockSlides);
-      setEditedSlides([...mockSlides]);
+      const response = await fetch('http://localhost:5000/api/carousel', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userInput: inputText, pageCount }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch from API');
+      }
+
+      const data = await response.json();
+      if (!data.slides || !Array.isArray(data.slides) || data.slides.length === 0) {
+        throw new Error('No valid slides generated');
+      }
+
+      setGeneratedSlides(data.slides);
+      setEditedSlides([...data.slides]);
       setCurrentSlide(0);
       
     } catch (error) {
       console.error('Error generating carousel:', error);
+      alert('Failed to generate carousel. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -89,12 +104,20 @@ export default function CarouselGenerator() {
     setCurrentSlide((prev) => (prev - 1 + generatedSlides.length) % generatedSlides.length);
   };
 
-  const copyAllSlides = () => {
+  const copyAllSlides = async () => {
     const slidesToCopy = isEditing ? editedSlides : generatedSlides;
     const allSlides = slidesToCopy.map((slide, index) => 
       `Slide ${index + 1}:\n${slide}\n\n`
     ).join('');
-    navigator.clipboard.writeText(allSlides);
+    
+    try {
+      await navigator.clipboard.writeText(allSlides);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy slides:', error);
+      alert('Failed to copy. Please select and copy the text manually.');
+    }
   };
 
   const handleSlideEdit = (index: number, newContent: string) => {
@@ -116,50 +139,47 @@ export default function CarouselGenerator() {
   const exportAsPDF = async () => {
     setIsExporting(true);
     try {
-      // Simulate PDF generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Create a simple HTML structure for PDF
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
       const slidesToExport = isEditing ? editedSlides : generatedSlides;
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Carousel Export</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-            .slide { page-break-after: always; padding: 40px; min-height: 80vh; display: flex; align-items: center; justify-content: center; }
-            .slide-content { text-align: center; max-width: 600px; }
-            .slide:last-child { page-break-after: avoid; }
-            h1 { color: #333; margin-bottom: 20px; }
-            pre { white-space: pre-wrap; font-size: 16px; line-height: 1.6; }
-          </style>
-        </head>
-        <body>
-          ${slidesToExport.map((slide, index) => `
-            <div class="slide">
-              <div class="slide-content">
-                <h1>Slide ${index + 1}</h1>
-                <pre>${slide}</pre>
-              </div>
-            </div>
-          `).join('')}
-        </body>
-        </html>
-      `;
-      
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'carousel-slides.html';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      const maxWidth = pageWidth - 2 * margin;
+
+      slidesToExport.forEach((slide, index) => {
+        if (index > 0) doc.addPage();
+
+        // Set template color for accents
+        doc.setDrawColor(selectedTemplate.color);
+        doc.setLineWidth(1);
+        doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin); // Border
+
+        // Slide title
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Slide ${index + 1}`, margin, margin + 10);
+
+        // Slide content
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        const splitText = doc.splitTextToSize(slide, maxWidth);
+        doc.text(splitText, margin, margin + 20, { maxWidth });
+
+        // Page number
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Page ${index + 1} of ${slidesToExport.length}`, pageWidth - margin - 10, pageHeight - margin, { align: 'right' });
+      });
+
+      doc.save('carousel-slides.pdf');
     } catch (error) {
       console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
     } finally {
       setIsExporting(false);
     }
@@ -258,10 +278,27 @@ export default function CarouselGenerator() {
                   {inputText.length}/500
                 </div>
               </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <label htmlFor="pageCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Number of Slides (1-10)
+                  </label>
+                  <input
+                    type="number"
+                    id="pageCount"
+                    value={pageCount}
+                    onChange={(e) => setPageCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                    min="1"
+                    max="10"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
               
               <button
                 onClick={generateCarousel}
-                disabled={!inputText.trim() || isGenerating}
+                disabled={!inputText.trim() || isGenerating || pageCount < 1 || pageCount > 10}
                 className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isGenerating ? (
@@ -293,11 +330,12 @@ export default function CarouselGenerator() {
                   <button
                     onClick={copyAllSlides}
                     className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center space-x-2"
+                    aria-label={isCopied ? 'Slides copied to clipboard' : 'Copy all slides to clipboard'}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    <span>Copy All</span>
+                    <span>{isCopied ? 'Copied!' : 'Copy All'}</span>
                   </button>
                 </div>
               </div>
@@ -407,7 +445,7 @@ export default function CarouselGenerator() {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
-                          <span>Export PDF</span>
+                          <span>Export as PDF</span>
                         </>
                       )}
                     </button>
@@ -418,7 +456,7 @@ export default function CarouselGenerator() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <span>Export TXT</span>
+                      <span>Export as TXT</span>
                     </button>
                   </>
                 )}
