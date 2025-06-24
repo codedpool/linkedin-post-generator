@@ -1,4 +1,258 @@
-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Header } from '@/components/Header';
+
+interface CarouselTemplate {
+  id: string;
+  name: string;
+  description: string;
+  preview: string;
+  style: string;
+}
+
+const templates: CarouselTemplate[] = [
+  {
+    id: 'modern',
+    name: 'Modern Professional',
+    description: 'Clean, minimalist design perfect for business content',
+    preview: '📊',
+    style: 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 border-l-4 border-blue-500'
+  },
+  {
+    id: 'creative',
+    name: 'Creative Vibrant',
+    description: 'Colorful and engaging for creative industries',
+    preview: '🎨',
+    style: 'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900 dark:to-pink-800 border-l-4 border-purple-500'
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal Clean',
+    description: 'Simple and elegant for focused messaging',
+    preview: '✨',
+    style: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-700 dark:to-slate-600 border-l-4 border-gray-500'
+  },
+  {
+    id: 'tech',
+    name: 'Tech Modern',
+    description: 'Perfect for technology and startup content',
+    preview: '💻',
+    style: 'bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-900 dark:to-teal-800 border-l-4 border-cyan-500'
+  }
+];
+
+export default function CarouselGenerator() {
+  const [inputText, setInputText] = useState('');
+  const [generatedSlides, setGeneratedSlides] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState<CarouselTemplate>(templates[0]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedSlides, setEditedSlides] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const generateCarousel = async () => {
+    if (!inputText.trim()) return;
+    
+    setIsGenerating(true);
+    
+    try {
+      // Simulate API call with mock data for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockSlides = [
+        `🚀 ${inputText}\n\nSlide 1: Introduction\n\nThis is the opening slide that introduces your main topic and hooks your audience.`,
+        `💡 Key Point #1\n\nHere's the first major insight or tip related to your topic. Make it actionable and valuable.`,
+        `📈 Key Point #2\n\nThe second important point that builds on the first. Include specific examples or data when possible.`,
+        `🎯 Key Point #3\n\nYour third main point that adds depth to your message. Keep it focused and relevant.`,
+        `✅ Conclusion\n\nWrap up with a clear call-to-action or summary. Encourage engagement and discussion.`
+      ];
+      
+      setGeneratedSlides(mockSlides);
+      setEditedSlides([...mockSlides]);
+      setCurrentSlide(0);
+      
+    } catch (error) {
+      console.error('Error generating carousel:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % generatedSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + generatedSlides.length) % generatedSlides.length);
+  };
+
+  const copyAllSlides = () => {
+    const slidesToCopy = isEditing ? editedSlides : generatedSlides;
+    const allSlides = slidesToCopy.map((slide, index) => 
+      `Slide ${index + 1}:\n${slide}\n\n`
+    ).join('');
+    navigator.clipboard.writeText(allSlides);
+  };
+
+  const handleSlideEdit = (index: number, newContent: string) => {
+    const updated = [...editedSlides];
+    updated[index] = newContent;
+    setEditedSlides(updated);
+  };
+
+  const saveEdits = () => {
+    setGeneratedSlides([...editedSlides]);
+    setIsEditing(false);
+  };
+
+  const cancelEdits = () => {
+    setEditedSlides([...generatedSlides]);
+    setIsEditing(false);
+  };
+
+  const exportAsPDF = async () => {
+    setIsExporting(true);
+    try {
+      // Simulate PDF generation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create a simple HTML structure for PDF
+      const slidesToExport = isEditing ? editedSlides : generatedSlides;
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Carousel Export</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            .slide { page-break-after: always; padding: 40px; min-height: 80vh; display: flex; align-items: center; justify-content: center; }
+            .slide-content { text-align: center; max-width: 600px; }
+            .slide:last-child { page-break-after: avoid; }
+            h1 { color: #333; margin-bottom: 20px; }
+            pre { white-space: pre-wrap; font-size: 16px; line-height: 1.6; }
+          </style>
+        </head>
+        <body>
+          ${slidesToExport.map((slide, index) => `
+            <div class="slide">
+              <div class="slide-content">
+                <h1>Slide ${index + 1}</h1>
+                <pre>${slide}</pre>
+              </div>
+            </div>
+          `).join('')}
+        </body>
+        </html>
+      `;
+      
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'carousel-slides.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportAsTXT = () => {
+    const slidesToExport = isEditing ? editedSlides : generatedSlides;
+    const textContent = slidesToExport.map((slide, index) => 
+      `Slide ${index + 1}:\n${slide}\n\n`
+    ).join('');
+    
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'carousel-slides.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      <Header />
+      
+      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <Link href="/" className="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-4">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Home
+            </Link>
+            
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                🎠
+              </div>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Carousel Generator
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Create engaging carousel posts that tell your story across multiple slides
+            </p>
+          </div>
+
+          {/* Template Selection */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+              Choose Your Template
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => setSelectedTemplate(template)}
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                    selectedTemplate.id === template.id
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-400'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="text-2xl">{template.preview}</div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{template.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{template.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Input Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
+              What story do you want to tell?
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="relative">
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  placeholder="Enter your main topic or theme... (e.g., '5 tips for better productivity', 'How to build a personal brand')"
+                  className="w-full h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
                 />
                 <div className="absolute bottom-3 right-3 text-sm text-gray-400">
                   {inputText.length}/500
