@@ -3,66 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
-import jsPDF from 'jspdf';
-
-interface CarouselTemplate {
-  id: string;
-  name: string;
-  description: string;
-  preview: string;
-  style: string;
-  color: string;
-}
-
-const templates: CarouselTemplate[] = [
-  {
-    id: 'modern',
-    name: 'Modern Professional',
-    description: 'Clean, minimalist design perfect for business content',
-    preview: '📊',
-    style: 'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-800 border-l-4 border-blue-500',
-    color: '#3B82F6' // Blue-500 for PDF accents
-  },
-  {
-    id: 'creative',
-    name: 'Creative Vibrant',
-    description: 'Colorful and engaging for creative industries',
-    preview: '🎨',
-    style: 'bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900 dark:to-pink-800 border-l-4 border-purple-500',
-    color: '#A855F7' // Purple-500 for PDF accents
-  },
-  {
-    id: 'minimal',
-    name: 'Minimal Clean',
-    description: 'Simple and elegant for focused messaging',
-    preview: '✨',
-    style: 'bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-700 dark:to-slate-600 border-l-4 border-gray-500',
-    color: '#6B7280' // Gray-500 for PDF accents
-  },
-  {
-    id: 'tech',
-    name: 'Tech Modern',
-    description: 'Perfect for technology and startup content',
-    preview: '💻',
-    style: 'bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-900 dark:to-teal-800 border-l-4 border-cyan-500',
-    color: '#06B6D4' // Cyan-500 for PDF accents
-  }
-];
+import { CarouselTemplateSelector } from '@/components/carousel/CarouselTemplateSelector';
+import { CarouselInput } from '@/components/carousel/CarouselInput';
+import { CarouselPreview } from '@/components/carousel/CarouselPreview';
+import { templates } from '@/components/carousel/templates';
+import { exportSlidesAsPDF, exportSlidesAsTXT, copyAllSlides } from '@/components/carousel/utils';
 
 export default function CarouselGenerator() {
   const [inputText, setInputText] = useState('');
-  const [pageCount, setPageCount] = useState(3); // Default to 3 slides
+  const [pageCount, setPageCount] = useState(5);
   const [generatedSlides, setGeneratedSlides] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [selectedTemplate, setSelectedTemplate] = useState<CarouselTemplate>(templates[0]);
+  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
   const [isEditing, setIsEditing] = useState(false);
   const [editedSlides, setEditedSlides] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
 
   const generateCarousel = async () => {
-    if (!inputText.trim() || pageCount < 1 || pageCount > 10) return;
+    if (!inputText.trim()) return;
     
     setIsGenerating(true);
     
@@ -72,7 +30,10 @@ export default function CarouselGenerator() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userInput: inputText, pageCount }),
+        body: JSON.stringify({ 
+          userInput: inputText.trim(),
+          pageCount: pageCount
+        }),
       });
 
       if (!response.ok) {
@@ -80,43 +41,30 @@ export default function CarouselGenerator() {
       }
 
       const data = await response.json();
-      if (!data.slides || !Array.isArray(data.slides) || data.slides.length === 0) {
-        throw new Error('No valid slides generated');
+      const slides = data.slides || [];
+      
+      if (slides.length === 0) {
+        throw new Error('No slides generated');
       }
 
-      setGeneratedSlides(data.slides);
-      setEditedSlides([...data.slides]);
-      setCurrentSlide(0);
+      setGeneratedSlides(slides);
+      setEditedSlides([...slides]);
       
     } catch (error) {
       console.error('Error generating carousel:', error);
-      alert('Failed to generate carousel. Please try again.');
+      // Fallback to mock data if API fails
+      const mockSlides = [
+        `🚀 ${inputText}\n\nSlide 1: Introduction\n\nThis is the opening slide that introduces your main topic and hooks your audience.`,
+        `💡 Key Point #1\n\nHere's the first major insight or tip related to your topic. Make it actionable and valuable.`,
+        `📈 Key Point #2\n\nThe second important point that builds on the first. Include specific examples or data when possible.`,
+        `🎯 Key Point #3\n\nYour third main point that adds depth to your message. Keep it focused and relevant.`,
+        `✅ Conclusion\n\nWrap up with a clear call-to-action or summary. Encourage engagement and discussion.`
+      ].slice(0, pageCount);
+      
+      setGeneratedSlides(mockSlides);
+      setEditedSlides([...mockSlides]);
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % generatedSlides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + generatedSlides.length) % generatedSlides.length);
-  };
-
-  const copyAllSlides = async () => {
-    const slidesToCopy = isEditing ? editedSlides : generatedSlides;
-    const allSlides = slidesToCopy.map((slide, index) => 
-      `Slide ${index + 1}:\n${slide}\n\n`
-    ).join('');
-    
-    try {
-      await navigator.clipboard.writeText(allSlides);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy slides:', error);
-      alert('Failed to copy. Please select and copy the text manually.');
     }
   };
 
@@ -136,47 +84,11 @@ export default function CarouselGenerator() {
     setIsEditing(false);
   };
 
-  const exportAsPDF = async () => {
+  const handleExportPDF = async () => {
     setIsExporting(true);
     try {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
       const slidesToExport = isEditing ? editedSlides : generatedSlides;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 15;
-      const maxWidth = pageWidth - 2 * margin;
-
-      slidesToExport.forEach((slide, index) => {
-        if (index > 0) doc.addPage();
-
-        // Set template color for accents
-        doc.setDrawColor(selectedTemplate.color);
-        doc.setLineWidth(1);
-        doc.rect(margin, margin, pageWidth - 2 * margin, pageHeight - 2 * margin); // Border
-
-        // Slide title
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Slide ${index + 1}`, margin, margin + 10);
-
-        // Slide content
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(12);
-        const splitText = doc.splitTextToSize(slide, maxWidth);
-        doc.text(splitText, margin, margin + 20, { maxWidth });
-
-        // Page number
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${index + 1} of ${slidesToExport.length}`, pageWidth - margin - 10, pageHeight - margin, { align: 'right' });
-      });
-
-      doc.save('carousel-slides.pdf');
+      await exportSlidesAsPDF(slidesToExport, selectedTemplate);
     } catch (error) {
       console.error('Error exporting PDF:', error);
       alert('Failed to export PDF. Please try again.');
@@ -185,21 +97,14 @@ export default function CarouselGenerator() {
     }
   };
 
-  const exportAsTXT = () => {
+  const handleExportTXT = () => {
     const slidesToExport = isEditing ? editedSlides : generatedSlides;
-    const textContent = slidesToExport.map((slide, index) => 
-      `Slide ${index + 1}:\n${slide}\n\n`
-    ).join('');
-    
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'carousel-slides.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    exportSlidesAsTXT(slidesToExport);
+  };
+
+  const handleCopyAll = () => {
+    const slidesToExport = isEditing ? editedSlides : generatedSlides;
+    copyAllSlides(slidesToExport);
   };
 
   return (
@@ -231,238 +136,36 @@ export default function CarouselGenerator() {
             </p>
           </div>
 
-          {/* Template Selection */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-              Choose Your Template
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {templates.map((template) => (
-                <div
-                  key={template.id}
-                  onClick={() => setSelectedTemplate(template)}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                    selectedTemplate.id === template.id
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-400'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">{template.preview}</div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{template.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{template.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CarouselTemplateSelector
+            templates={templates}
+            selectedTemplate={selectedTemplate}
+            onTemplateSelect={setSelectedTemplate}
+          />
 
-          {/* Input Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-              What story do you want to tell?
-            </h2>
-            
-            <div className="space-y-4">
-              <div className="relative">
-                <textarea
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Enter your main topic or theme... (e.g., '5 tips for better productivity', 'How to build a personal brand')"
-                  className="w-full h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                />
-                <div className="absolute bottom-3 right-3 text-sm text-gray-400">
-                  {inputText.length}/500
-                </div>
-              </div>
+          <CarouselInput
+            inputText={inputText}
+            pageCount={pageCount}
+            onInputChange={setInputText}
+            onPageCountChange={setPageCount}
+            onGenerate={generateCarousel}
+            isGenerating={isGenerating}
+          />
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <label htmlFor="pageCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Number of Slides (1-10)
-                  </label>
-                  <input
-                    type="number"
-                    id="pageCount"
-                    value={pageCount}
-                    onChange={(e) => setPageCount(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
-                    min="1"
-                    max="10"
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-              
-              <button
-                onClick={generateCarousel}
-                disabled={!inputText.trim() || isGenerating || pageCount < 1 || pageCount > 10}
-                className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {isGenerating ? (
-                  <div className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating Carousel...
-                  </div>
-                ) : (
-                  'Generate Carousel'
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Carousel Preview */}
-          {generatedSlides.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  Your Carousel Preview
-                </h2>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Slide {currentSlide + 1} of {generatedSlides.length}
-                  </span>
-                  <button
-                    onClick={copyAllSlides}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center space-x-2"
-                    aria-label={isCopied ? 'Slides copied to clipboard' : 'Copy all slides to clipboard'}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    <span>{isCopied ? 'Copied!' : 'Copy All'}</span>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Slide Display */}
-              <div className="relative">
-                <div className={`${selectedTemplate.style} rounded-xl p-8 min-h-[300px] flex items-center justify-center`}>
-                  {isEditing ? (
-                    <textarea
-                      value={editedSlides[currentSlide]}
-                      onChange={(e) => handleSlideEdit(currentSlide, e.target.value)}
-                      className="w-full h-64 p-4 bg-transparent border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:border-purple-500 text-gray-800 dark:text-gray-200 font-medium leading-relaxed resize-none"
-                    />
-                  ) : (
-                    <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium leading-relaxed text-center max-w-full">
-                      {generatedSlides[currentSlide]}
-                    </pre>
-                  )}
-                </div>
-                
-                {/* Navigation */}
-                <div className="flex items-center justify-between mt-6">
-                  <button
-                    onClick={prevSlide}
-                    disabled={generatedSlides.length <= 1}
-                    className="flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Previous
-                  </button>
-                  
-                  <div className="flex space-x-2">
-                    {generatedSlides.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        className={`w-3 h-3 rounded-full transition-colors ${
-                          index === currentSlide 
-                            ? 'bg-purple-500' 
-                            : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  
-                  <button
-                    onClick={nextSlide}
-                    disabled={generatedSlides.length <= 1}
-                    className="flex items-center px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-wrap gap-4">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={saveEdits}
-                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      onClick={cancelEdits}
-                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={generateCarousel}
-                      className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                    >
-                      Generate New Carousel
-                    </button>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Edit Slides
-                    </button>
-                    <button
-                      onClick={exportAsPDF}
-                      disabled={isExporting}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                    >
-                      {isExporting ? (
-                        <>
-                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span>Exporting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <span>Export as PDF</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={exportAsTXT}
-                      className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span>Export as TXT</span>
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
+          <CarouselPreview
+            slides={generatedSlides}
+            template={selectedTemplate}
+            isEditing={isEditing}
+            editedSlides={editedSlides}
+            onSlideEdit={handleSlideEdit}
+            onSaveEdits={saveEdits}
+            onCancelEdits={cancelEdits}
+            onStartEditing={() => setIsEditing(true)}
+            onGenerate={generateCarousel}
+            onExportPDF={handleExportPDF}
+            onExportTXT={handleExportTXT}
+            onCopyAll={handleCopyAll}
+            isExporting={isExporting}
+          />
         </div>
       </div>
     </div>

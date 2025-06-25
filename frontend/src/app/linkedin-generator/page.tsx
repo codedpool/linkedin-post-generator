@@ -5,23 +5,29 @@ import Link from 'next/link';
 import { Header } from '@/components/Header';
 
 export default function LinkedInGenerator() {
-  const [inputText, setInputText] = useState('');
+  const [topicText, setTopicText] = useState('');
+  const [contextText, setContextText] = useState('');
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const generatePost = async () => {
-    if (!inputText.trim()) return;
+    if (!topicText.trim()) return;
     
     setIsGenerating(true);
     
     try {
+      // Combine topic and context for the API call
+      const userInput = contextText.trim() 
+        ? `${topicText.trim()}\n\nContext: ${contextText.trim()}`
+        : topicText.trim();
+
       const response = await fetch('http://localhost:5000/api/short-text', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userInput: inputText }),
+        body: JSON.stringify({ userInput }),
       });
 
       if (!response.ok) {
@@ -45,7 +51,7 @@ export default function LinkedInGenerator() {
     try {
       await navigator.clipboard.writeText(generatedPost);
       setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       alert('Failed to copy. Please select and copy the text manually.');
@@ -84,25 +90,52 @@ export default function LinkedInGenerator() {
           {/* Input Section */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-              Whats on your mind?
+              What is on your mind?
             </h2>
             
-            <div className="space-y-4">
-              <div className="relative">
-                <textarea
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Enter your topic, idea, or key message here... (e.g., 'The importance of continuous learning in tech')"
-                  className="w-full h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                />
-                <div className="absolute bottom-3 right-3 text-sm text-gray-400">
-                  {inputText.length}/500
+            <div className="space-y-6">
+              {/* Topic Input */}
+              <div>
+                <label htmlFor="topic" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Topic <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="topic"
+                    value={topicText}
+                    onChange={(e) => setTopicText(e.target.value)}
+                    placeholder="Enter your main topic or key message... (e.g., 'The importance of continuous learning in tech')"
+                    className="w-full h-24 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                    required
+                  />
+                  <div className="absolute bottom-3 right-3 text-sm text-gray-400">
+                    {topicText.length}/300
+                  </div>
+                </div>
+              </div>
+
+              {/* Context Input */}
+              <div>
+                <label htmlFor="context" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Context <span className="text-gray-400">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <textarea
+                    id="context"
+                    value={contextText}
+                    onChange={(e) => setContextText(e.target.value)}
+                    placeholder="Provide additional context, background, or specific details... (e.g., 'Based on my 5 years in software development', 'Recent industry trends show...')"
+                    className="w-full h-24 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                  />
+                  <div className="absolute bottom-3 right-3 text-sm text-gray-400">
+                    {contextText.length}/500
+                  </div>
                 </div>
               </div>
               
               <button
                 onClick={generatePost}
-                disabled={!inputText.trim() || isGenerating}
+                disabled={!topicText.trim() || isGenerating}
                 className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isGenerating ? (
