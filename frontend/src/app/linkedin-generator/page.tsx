@@ -8,8 +8,10 @@ export default function LinkedInGenerator() {
   const [topicText, setTopicText] = useState('');
   const [contextText, setContextText] = useState('');
   const [generatedPost, setGeneratedPost] = useState('');
+  const [editedPost, setEditedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const generatePost = async () => {
     if (!topicText.trim()) return;
@@ -35,27 +37,48 @@ export default function LinkedInGenerator() {
       }
 
       const data = await response.json();
-      setGeneratedPost(data.content || 'No content generated');
+      const content = data.content || 'No content generated';
+      setGeneratedPost(content);
+      setEditedPost(content);
+      setIsEditing(false);
       
     } catch (error) {
       console.error('Error generating LinkedIn post:', error);
-      setGeneratedPost('Failed to generate post. Please try again.');
+      const fallbackContent = 'Failed to generate post. Please try again.';
+      setGeneratedPost(fallbackContent);
+      setEditedPost(fallbackContent);
     } finally {
       setIsGenerating(false);
     }
   };
 
   const copyToClipboard = async () => {
-    if (!generatedPost) return;
+    const contentToCopy = isEditing ? editedPost : generatedPost;
+    if (!contentToCopy) return;
 
     try {
-      await navigator.clipboard.writeText(generatedPost);
+      await navigator.clipboard.writeText(contentToCopy);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       alert('Failed to copy. Please select and copy the text manually.');
     }
+  };
+
+  const startEditing = () => {
+    setIsEditing(true);
+    setEditedPost(generatedPost);
+  };
+
+  const saveEdit = () => {
+    setGeneratedPost(editedPost);
+    setIsEditing(false);
+  };
+
+  const cancelEdit = () => {
+    setEditedPost(generatedPost);
+    setIsEditing(false);
   };
 
   return (
@@ -173,21 +196,52 @@ export default function LinkedInGenerator() {
               </div>
               
               <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-l-4 border-blue-500">
-                <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                  {generatedPost}
-                </pre>
+                {isEditing ? (
+                  <textarea
+                    value={editedPost}
+                    onChange={(e) => setEditedPost(e.target.value)}
+                    className="w-full h-64 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 dark:text-gray-200 font-medium leading-relaxed resize-none"
+                    placeholder="Edit your LinkedIn post..."
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
+                    {generatedPost}
+                  </pre>
+                )}
               </div>
               
               <div className="mt-6 flex flex-wrap gap-4">
-                <button
-                  onClick={generatePost}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Generate Another
-                </button>
-                <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  Edit Post
-                </button>
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={saveEdit}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={cancelEdit}
+                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={generatePost}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Generate Another
+                    </button>
+                    <button
+                      onClick={startEditing}
+                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Edit Post
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
