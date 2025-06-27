@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { CarouselTemplate } from './types';
 
 interface SlideDisplayProps {
@@ -25,8 +25,39 @@ export function SlideDisplay({
   // Calculate word count for the slide content
   const wordCount = content.split(/\s+/).filter(word => word.trim().length > 0).length;
   
-  // Define dimensions based on mode
-  const dimensions = isForPDF ? '800x600px' : '1080x1080px'; // Assuming square LinkedIn carousel size for preview
+  // Define dimensions for PDF mode; use state for preview mode
+  const pdfDimensions = '800x600px';
+  const [previewDimensions, setPreviewDimensions] = useState('Calculating...');
+  const slideRef = useRef<HTMLDivElement>(null);
+
+  // Calculate dimensions for preview mode using ResizeObserver
+  useEffect(() => {
+    if (!isForPDF && slideRef.current) {
+      const updateDimensions = () => {
+        if (slideRef.current) {
+          const { width, height } = slideRef.current.getBoundingClientRect();
+          if (width > 0 && height > 0) {
+            setPreviewDimensions(`${Math.round(width)}x${Math.round(height)}px`);
+          } else {
+            setPreviewDimensions('N/A');
+          }
+        }
+      };
+
+      // Initial measurement
+      updateDimensions();
+
+      // Use ResizeObserver to detect size changes due to content or layout
+      const observer = new ResizeObserver(updateDimensions);
+      observer.observe(slideRef.current);
+
+      // Cleanup
+      return () => observer.disconnect();
+    }
+  }, [isForPDF, content]); // Re-run when content changes
+
+  // Use PDF dimensions for PDF mode, preview dimensions for preview mode
+  const dimensions = isForPDF ? pdfDimensions : previewDimensions;
 
   if (isForPDF) {
     return (
@@ -141,7 +172,7 @@ export function SlideDisplay({
               height: '80px',
               border: `2px solid ${template.pdfStyle.primaryColor}`,
               borderRadius: '8px',
-              opacity: '0.4',
+              opacity: 0.4,
             }} />
           </>
         )}
@@ -309,7 +340,10 @@ export function SlideDisplay({
   const textStyles = getTemplateSpecificTextStyles();
 
   return (
-    <div className={`${template.style} rounded-xl p-8 min-h-[400px] flex flex-col justify-center items-center relative overflow-hidden shadow-2xl`}>
+    <div 
+      ref={slideRef}
+      className={`${template.style} rounded-xl p-8 min-h-[400px] flex flex-col justify-center items-center relative overflow-hidden shadow-2xl`}
+    >
       {/* Template-specific decorative elements */}
       {getTemplateSpecificElements()}
 
