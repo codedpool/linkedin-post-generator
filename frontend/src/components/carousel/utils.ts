@@ -9,7 +9,7 @@ export const exportSlidesAsPDF = async (
   const pdf = new jsPDF({
     orientation: 'landscape',
     unit: 'px',
-    format: [800, 600]
+    format: [1200, 1500] // PDF page size
   });
 
   for (let i = 0; i < slides.length; i++) {
@@ -18,23 +18,23 @@ export const exportSlidesAsPDF = async (
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
     tempContainer.style.top = '-9999px';
-    tempContainer.style.width = '800px';
-    tempContainer.style.height = '600px';
+    tempContainer.style.width = '1200px'; // Match PDF width
+    tempContainer.style.height = '1500px'; // Match PDF height
     document.body.appendChild(tempContainer);
 
     // Create slide element directly as DOM element
     const slideElement = document.createElement('div');
-    slideElement.style.width = '800px';
-    slideElement.style.height = '600px';
+    slideElement.style.width = '1200px'; // Match PDF width
+    slideElement.style.height = '1500px'; // Match PDF height
     slideElement.style.background = template.pdfStyle.background;
-    slideElement.style.display = 'flex';
-    slideElement.style.flexDirection = 'column';
-    slideElement.style.justifyContent = 'center';
-    slideElement.style.alignItems = 'center';
-    slideElement.style.padding = '60px';
     slideElement.style.fontFamily = 'Arial, sans-serif';
     slideElement.style.position = 'relative';
     slideElement.style.boxSizing = 'border-box';
+    // Remove flex centering to allow content to fill space
+    // slideElement.style.display = 'flex';
+    // slideElement.style.flexDirection = 'column';
+    // slideElement.style.justifyContent = 'center';
+    // slideElement.style.alignItems = 'center';
 
     // Parse content
     const lines = slides[i].split('\n').filter(line => line.trim());
@@ -47,17 +47,17 @@ export const exportSlidesAsPDF = async (
     headerBar.style.top = '0';
     headerBar.style.left = '0';
     headerBar.style.right = '0';
-    headerBar.style.height = '8px';
+    headerBar.style.height = '12px'; // Scaled from 8px
     headerBar.style.background = template.pdfStyle.primaryColor;
     slideElement.appendChild(headerBar);
 
     // Create decorative circles
     const circle1 = document.createElement('div');
     circle1.style.position = 'absolute';
-    circle1.style.top = '20px';
-    circle1.style.right = '20px';
-    circle1.style.width = '60px';
-    circle1.style.height = '60px';
+    circle1.style.top = '30px';
+    circle1.style.right = '30px';
+    circle1.style.width = '90px';
+    circle1.style.height = '90px';
     circle1.style.borderRadius = '50%';
     circle1.style.background = template.pdfStyle.accentColor;
     circle1.style.opacity = '0.3';
@@ -65,10 +65,10 @@ export const exportSlidesAsPDF = async (
 
     const circle2 = document.createElement('div');
     circle2.style.position = 'absolute';
-    circle2.style.bottom = '20px';
-    circle2.style.left = '20px';
-    circle2.style.width = '40px';
-    circle2.style.height = '40px';
+    circle2.style.bottom = '30px';
+    circle2.style.left = '30px';
+    circle2.style.width = '60px';
+    circle2.style.height = '60px';
     circle2.style.borderRadius = '50%';
     circle2.style.background = template.pdfStyle.secondaryColor;
     circle2.style.opacity = '0.2';
@@ -77,9 +77,9 @@ export const exportSlidesAsPDF = async (
     // Create slide number
     const slideNumber = document.createElement('div');
     slideNumber.style.position = 'absolute';
-    slideNumber.style.top = '30px';
-    slideNumber.style.left = '30px';
-    slideNumber.style.fontSize = '14px';
+    slideNumber.style.top = '45px';
+    slideNumber.style.left = '45px';
+    slideNumber.style.fontSize = '21px';
     slideNumber.style.color = template.pdfStyle.primaryColor;
     slideNumber.style.fontWeight = 'bold';
     slideNumber.textContent = `${i + 1}/${slides.length}`;
@@ -87,31 +87,32 @@ export const exportSlidesAsPDF = async (
 
     // Create main content container
     const contentContainer = document.createElement('div');
+    contentContainer.style.position = 'absolute';
+    contentContainer.style.top = '90px'; // Start below header and padding
+    contentContainer.style.left = '90px';
+    contentContainer.style.right = '90px';
+    contentContainer.style.bottom = '90px'; // Allow space for footer
     contentContainer.style.textAlign = 'center';
-    contentContainer.style.maxWidth = '600px';
-    contentContainer.style.width = '100%';
     contentContainer.style.overflow = 'hidden';
 
     // Create title with dynamic font sizing
     const titleElement = document.createElement('h1');
     const titleLength = title.length;
-    let titleFontSize = '32px';
+    let titleFontSize = '48px'; // Base size
     
-    // Adjust title font size based on length
     if (titleLength > 80) {
-      titleFontSize = '24px';
+      titleFontSize = '36px';
     } else if (titleLength > 60) {
-      titleFontSize = '28px';
+      titleFontSize = '42px';
     } else if (titleLength > 40) {
-      titleFontSize = '30px';
+      titleFontSize = '45px';
     }
     
     titleElement.style.fontSize = titleFontSize;
     titleElement.style.fontWeight = 'bold';
     titleElement.style.color = template.pdfStyle.headerColor;
-    titleElement.style.marginBottom = '24px';
+    titleElement.style.marginBottom = '36px';
     titleElement.style.lineHeight = '1.2';
-    titleElement.style.margin = '0 0 24px 0';
     titleElement.style.wordWrap = 'break-word';
     titleElement.style.overflowWrap = 'break-word';
     titleElement.style.hyphens = 'auto';
@@ -122,17 +123,16 @@ export const exportSlidesAsPDF = async (
     if (bodyContent) {
       const bodyElement = document.createElement('div');
       const bodyLength = bodyContent.length;
-      let bodyFontSize = '16px';
+      let bodyFontSize = '24px'; // Base size
       
-      // Adjust body font size based on content length
       if (bodyLength > 800) {
-        bodyFontSize = '14px';
+        bodyFontSize = '21px';
       } else if (bodyLength > 600) {
-        bodyFontSize = '15px';
+        bodyFontSize = '22.5px';
       } else if (bodyLength > 400) {
-        bodyFontSize = '16px';
+        bodyFontSize = '24px';
       } else {
-        bodyFontSize = '17px';
+        bodyFontSize = '25.5px';
       }
       
       bodyElement.style.fontSize = bodyFontSize;
@@ -142,8 +142,8 @@ export const exportSlidesAsPDF = async (
       bodyElement.style.wordWrap = 'break-word';
       bodyElement.style.overflowWrap = 'break-word';
       bodyElement.style.hyphens = 'auto';
-      bodyElement.style.maxHeight = '350px';
-      bodyElement.style.overflow = 'hidden';
+      bodyElement.style.maxHeight = 'calc(100% - 100px)'; // Allow dynamic height
+      bodyElement.style.overflow = 'auto';
       bodyElement.textContent = bodyContent;
       contentContainer.appendChild(bodyElement);
     }
@@ -156,7 +156,7 @@ export const exportSlidesAsPDF = async (
     footerGradient.style.bottom = '0';
     footerGradient.style.left = '0';
     footerGradient.style.right = '0';
-    footerGradient.style.height = '4px';
+    footerGradient.style.height = '6px';
     footerGradient.style.background = `linear-gradient(90deg, ${template.pdfStyle.primaryColor} 0%, ${template.pdfStyle.accentColor} 100%)`;
     slideElement.appendChild(footerGradient);
 
@@ -166,11 +166,11 @@ export const exportSlidesAsPDF = async (
       // Wait a moment for styles to apply
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Convert to canvas with consistent settings
+      // Convert to canvas with settings matching PDF size
       const canvas = await html2canvas(slideElement, {
-        width: 800,
-        height: 600,
-        scale: 1.5, // Reduced scale for better consistency
+        width: 1200,
+        height: 1500,
+        scale: 1.0,
         backgroundColor: null,
         logging: false,
         useCORS: true,
@@ -186,7 +186,7 @@ export const exportSlidesAsPDF = async (
       }
       
       const imgData = canvas.toDataURL('image/png', 1.0);
-      pdf.addImage(imgData, 'PNG', 0, 0, 800, 600);
+      pdf.addImage(imgData, 'PNG', 0, 0, 1200, 1500);
 
     } catch (error) {
       console.error(`Error processing slide ${i + 1}:`, error);
