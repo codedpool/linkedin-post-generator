@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 
-// Predefined system prompts for dropdown
+// Predefined system prompts for dropdown (unchanged)
 const systemPrompts = {
   professional: {
     name: 'Professional',
@@ -67,8 +67,11 @@ export default function LinkedInGenerator() {
   const [generatedPost, setGeneratedPost] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  // New state for edit mode and edited post content
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPost, setEditedPost] = useState('');
 
-  // Handle dropdown change
+  // Handle dropdown change (unchanged)
   const handlePromptChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const promptKey = e.target.value;
     setSelectedPrompt(promptKey);
@@ -81,7 +84,6 @@ export default function LinkedInGenerator() {
     setIsGenerating(true);
     
     try {
-      // Combine topic and context for the API call
       const userInput = contextText.trim() 
         ? `${topicText.trim()}\n\nContext: ${contextText.trim()}`
         : topicText.trim();
@@ -100,7 +102,7 @@ export default function LinkedInGenerator() {
 
       const data = await response.json();
       setGeneratedPost(data.content || 'No content generated');
-      
+      setIsEditing(false); // Reset edit mode when generating a new post
     } catch (error) {
       console.error('Error generating LinkedIn post:', error);
       setGeneratedPost('Failed to generate post. Please try again.');
@@ -120,6 +122,24 @@ export default function LinkedInGenerator() {
       console.error('Failed to copy to clipboard:', error);
       alert('Failed to copy. Please select and copy the text manually.');
     }
+  };
+
+  // New function to handle entering edit mode
+  const handleEditPost = () => {
+    setIsEditing(true);
+    setEditedPost(generatedPost); // Initialize edited post with current generated post
+  };
+
+  // New function to handle saving edits
+  const handleSaveEdit = () => {
+    setGeneratedPost(editedPost); // Update generated post with edited content
+    setIsEditing(false); // Exit edit mode
+  };
+
+  // New function to handle canceling edits
+  const handleCancelEdit = () => {
+    setIsEditing(false); // Exit edit mode without saving
+    setEditedPost(''); // Clear edited post
   };
 
   return (
@@ -150,14 +170,13 @@ export default function LinkedInGenerator() {
             </p>
           </div>
 
-          {/* Input Section */}
+          {/* Input Section (unchanged) */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
               What is on your mind?
             </h2>
             
             <div className="space-y-6">
-              {/* Topic Input */}
               <div>
                 <label htmlFor="topic" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Topic <span className="text-red-500">*</span>
@@ -177,7 +196,6 @@ export default function LinkedInGenerator() {
                 </div>
               </div>
 
-              {/* System Prompt Dropdown */}
               <div>
                 <label htmlFor="promptSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Select System Prompt
@@ -194,7 +212,6 @@ export default function LinkedInGenerator() {
                 </select>
               </div>
 
-              {/* System Prompt Input */}
               <div>
                 <label htmlFor="context" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   System Prompt <span className="text-gray-400">(Optional Edit)</span>
@@ -233,7 +250,7 @@ export default function LinkedInGenerator() {
             </div>
           </div>
 
-          {/* Output Section - Only shows when post is generated */}
+          {/* Output Section */}
           {generatedPost && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
@@ -252,11 +269,37 @@ export default function LinkedInGenerator() {
                 </button>
               </div>
               
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-l-4 border-blue-500">
-                <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
-                  {generatedPost}
-                </pre>
-              </div>
+              {/* Conditionally render edit mode or view mode */}
+              {isEditing ? (
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-l-4 border-blue-500">
+                  <textarea
+                    value={editedPost}
+                    onChange={(e) => setEditedPost(e.target.value)}
+                    className="w-full h-48 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                    placeholder="Edit your LinkedIn post here..."
+                  />
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    <button
+                      onClick={handleSaveEdit}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-l-4 border-blue-500">
+                  <pre className="whitespace-pre-wrap text-gray-800 dark:text-gray-200 font-medium leading-relaxed">
+                    {generatedPost}
+                  </pre>
+                </div>
+              )}
               
               <div className="mt-6 flex flex-wrap gap-4">
                 <button
@@ -265,7 +308,11 @@ export default function LinkedInGenerator() {
                 >
                   Generate Another
                 </button>
-                <button className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <button
+                  onClick={handleEditPost}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  disabled={isEditing} // Disable Edit button when already in edit mode
+                >
                   Edit Post
                 </button>
               </div>
