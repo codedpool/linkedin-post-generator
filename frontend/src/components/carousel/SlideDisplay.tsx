@@ -32,212 +32,53 @@ export function SlideDisplay({
 
   // Use fixed dimensions based on mode
   const dimensions = isForPDF ? pdfDimensions : previewDimensions;
+  const width = isForPDF ? '1200px' : '800px';
+  const height = isForPDF ? '1500px' : '600px';
+  const fontScale = isForPDF ? 1.5 : 1; // Scale fonts for PDF
+  const padding = isForPDF ? '90px' : '60px';
+  const maxContentWidth = isForPDF ? '1020px' : '680px'; // 1200 - 2*90 or 800 - 2*60
+  const maxContentHeight = isForPDF ? '1320px' : '480px'; // 1500 - 2*90 or 600 - 2*60
 
-  if (isForPDF) {
-    return (
-      <div 
-        style={{
-          width: '1200px', // Updated PDF width
-          height: '1500px', // Updated PDF height
-          background: template.pdfStyle.background,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '90px', // Scaled padding for larger dimensions (60px * 1.5)
-          fontFamily: 'Arial, sans-serif',
-          position: 'relative',
-          boxSizing: 'border-box',
-        }}
-      >
-        {/* Template-specific PDF decorations */}
-        {template.id === 'modern' && (
-          <>
-            <div style={{
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              right: '0',
-              height: '9px', // Scaled from 6px
-              background: template.pdfStyle.primaryColor,
-            }} />
-            <div style={{
-              position: 'absolute',
-              top: '45px', // Scaled from 30px
-              right: '45px',
-              width: '120px', // Scaled from 80px
-              height: '120px',
-              border: `4.5px solid ${template.pdfStyle.accentColor}`, // Scaled from 3px
-              borderRadius: '50%',
-              opacity: 0.3,
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: '45px',
-              left: '45px',
-              width: '180px', // Scaled from 120px
-              height: '6px', // Scaled from 4px
-              background: template.pdfStyle.primaryColor,
-              opacity: 0.6,
-            }} />
-          </>
-        )}
-
-        {template.id === 'creative' && (
-          <>
-            <div style={{
-              position: 'absolute',
-              top: '30px', // Scaled from 20px
-              right: '30px',
-              width: '150px', // Scaled from 100px
-              height: '150px',
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: '30px', // Scaled from 20px
-              transform: 'rotate(15deg)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: '30px',
-              left: '30px',
-              width: '90px', // Scaled from 60px
-              height: '90px',
-              background: 'rgba(251,191,36,0.8)',
-              borderRadius: '50%',
-            }} />
-          </>
-        )}
-
-        {template.id === 'minimal' && (
-          <>
-            <div style={{
-              position: 'absolute',
-              top: '60px', // Scaled from 40px
-              right: '60px',
-              width: '90px', // Scaled from 60px
-              height: '3px', // Scaled from 2px
-              background: template.pdfStyle.accentColor,
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: '60px',
-              left: '60px',
-              width: '3px', // Scaled from 2px
-              height: '90px', // Scaled from 60px
-              background: template.pdfStyle.accentColor,
-            }} />
-          </>
-        )}
-
-        {template.id === 'tech' && (
-          <>
-            <div style={{
-              position: 'absolute',
-              top: '0',
-              left: '0',
-              right: '0',
-              bottom: '0',
-              background: 'radial-gradient(circle at 20% 80%, rgba(0,212,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(52,211,153,0.1) 0%, transparent 50%)',
-            }} />
-            <div style={{
-              position: 'absolute',
-              top: '45px', // Scaled from 30px
-              right: '45px',
-              width: '120px', // Scaled from 80px
-              height: '120px',
-              border: `3px solid ${template.pdfStyle.primaryColor}`, // Scaled from 2px
-              borderRadius: '12px', // Scaled from 8px
-              opacity: '0.4',
-            }} />
-          </>
-        )}
-        
-        {/* Slide number */}
-        <div style={{
-          position: 'absolute',
-          top: '45px', // Scaled from 30px
-          left: '45px',
-          fontSize: '21px', // Scaled from 14px
-          color: template.pdfStyle.primaryColor,
-          fontWeight: 'bold',
-        }}>
-          {slideNumber}/{totalSlides}
-        </div>
-
-        {/* Main content */}
-        <div style={{
-          textAlign: 'center',
-          maxWidth: '900px', // Scaled from 600px
-          zIndex: 10,
-        }}>
-          <h1 style={{
-            fontSize: '54px', // Scaled from 36px
-            fontWeight: 'bold',
-            color: template.pdfStyle.headerColor,
-            marginBottom: '45px', // Scaled from 30px
-            lineHeight: '1.2',
-          }}>
-            {title}
-          </h1>
-          
-          {bodyContent && (
-            <div style={{
-              fontSize: '27px', // Scaled from 18px
-              lineHeight: '1.6',
-              color: template.pdfStyle.textColor,
-              whiteSpace: 'pre-wrap',
-            }}>
-              {bodyContent}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // Dynamic font sizing based on content length
+  const titleLength = title.length;
+  const bodyLength = bodyContent.length;
+  const titleFontSize = titleLength > 80 ? 24 * fontScale : titleLength > 60 ? 30 * fontScale : titleLength > 40 ? 33 * fontScale : 36 * fontScale;
+  const bodyFontSize = bodyLength > 800 ? 18 * fontScale : bodyLength > 600 ? 19.5 * fontScale : bodyLength > 400 ? 21 * fontScale : 22.5 * fontScale;
 
   const getTemplateSpecificElements = () => {
+    const baseStyles = {
+      position: 'absolute' as const,
+      zIndex: 5,
+    };
+
     switch (template.id) {
       case 'modern':
         return (
           <>
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-blue-600"></div>
-            <div className="absolute top-6 right-6 w-20 h-20 border-3 border-blue-500/30 rounded-full"></div>
-            <div className="absolute bottom-6 left-6 w-32 h-1 bg-blue-600/60"></div>
-            <div className="absolute top-1/2 right-12 w-1 h-24 bg-blue-400/20 transform -translate-y-1/2"></div>
-            <div className="absolute top-20 left-6 w-4 h-4 bg-blue-500/40 transform rotate-45"></div>
+            <div style={{ ...baseStyles, top: '0', left: '0', right: '0', height: isForPDF ? '9px' : '6px', background: template.pdfStyle.primaryColor }} />
+            <div style={{ ...baseStyles, top: isForPDF ? '45px' : '30px', right: isForPDF ? '45px' : '30px', width: isForPDF ? '120px' : '80px', height: isForPDF ? '120px' : '80px', border: `3px solid ${template.pdfStyle.accentColor}`, borderRadius: '50%', opacity: 0.3 }} />
+            <div style={{ ...baseStyles, bottom: isForPDF ? '45px' : '30px', left: isForPDF ? '45px' : '30px', width: isForPDF ? '180px' : '120px', height: isForPDF ? '6px' : '4px', background: template.pdfStyle.primaryColor, opacity: 0.6 }} />
           </>
         );
       case 'creative':
         return (
           <>
-            <div className="absolute top-4 right-4 w-24 h-24 bg-white/20 rounded-3xl transform rotate-12"></div>
-            <div className="absolute bottom-4 left-4 w-16 h-16 bg-yellow-400/80 rounded-full"></div>
-            <div className="absolute top-1/3 left-8 w-8 h-8 bg-white/30 rounded-lg transform -rotate-12"></div>
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/10 to-transparent"></div>
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full transform translate-x-20 -translate-y-20"></div>
+            <div style={{ ...baseStyles, top: isForPDF ? '30px' : '20px', right: isForPDF ? '30px' : '20px', width: isForPDF ? '150px' : '100px', height: isForPDF ? '150px' : '100px', background: 'rgba(255,255,255,0.2)', borderRadius: isForPDF ? '30px' : '20px', transform: 'rotate(15deg)' }} />
+            <div style={{ ...baseStyles, bottom: isForPDF ? '30px' : '20px', left: isForPDF ? '30px' : '20px', width: isForPDF ? '90px' : '60px', height: isForPDF ? '90px' : '60px', background: 'rgba(251,191,36,0.8)', borderRadius: '50%' }} />
           </>
         );
       case 'minimal':
         return (
           <>
-            <div className="absolute top-8 right-8 w-16 h-0.5 bg-gray-400"></div>
-            <div className="absolute bottom-8 left-8 w-0.5 h-16 bg-gray-400"></div>
-            <div className="absolute top-16 left-8 w-2 h-2 bg-gray-500 rounded-full"></div>
-            <div className="absolute bottom-16 right-8 w-3 h-3 border border-gray-400"></div>
-            <div className="absolute top-1/2 left-1/2 w-12 h-px bg-gray-300 transform -translate-x-1/2 translate-y-16"></div>
+            <div style={{ ...baseStyles, top: isForPDF ? '60px' : '40px', right: isForPDF ? '60px' : '40px', width: isForPDF ? '90px' : '60px', height: isForPDF ? '3px' : '2px', background: template.pdfStyle.accentColor }} />
+            <div style={{ ...baseStyles, bottom: isForPDF ? '60px' : '40px', left: isForPDF ? '60px' : '40px', width: isForPDF ? '3px' : '2px', height: isForPDF ? '90px' : '60px', background: template.pdfStyle.accentColor }} />
           </>
         );
       case 'tech':
         return (
           <>
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-emerald-500/5"></div>
-            <div className="absolute top-6 right-6 w-20 h-20 border-2 border-cyan-400/40 rounded-lg"></div>
-            <div className="absolute bottom-6 left-6 w-12 h-12 bg-emerald-400/20 rounded transform rotate-45"></div>
-            <div className="absolute top-1/4 right-12 w-px h-20 bg-cyan-400/30"></div>
-            <div className="absolute top-1/3 right-8 w-8 h-px bg-cyan-400/30"></div>
-            <div className="absolute bottom-1/4 left-12 w-6 h-6 bg-cyan-400/20 rounded-full blur-sm"></div>
-            <div className="absolute bottom-1/4 left-12 w-3 h-3 bg-cyan-400 rounded-full"></div>
-            <div className="absolute top-20 left-20 w-16 h-px bg-gradient-to-r from-cyan-400/50 to-transparent"></div>
-            <div className="absolute bottom-20 right-20 w-px h-16 bg-gradient-to-b from-emerald-400/50 to-transparent"></div>
+            <div style={{ ...baseStyles, top: '0', left: '0', right: '0', bottom: '0', background: 'radial-gradient(circle at 20% 80%, rgba(0,212,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(52,211,153,0.1) 0%, transparent 50%)' }} />
+            <div style={{ ...baseStyles, top: isForPDF ? '45px' : '30px', right: isForPDF ? '45px' : '30px', width: isForPDF ? '120px' : '80px', height: isForPDF ? '120px' : '80px', border: `3px solid ${template.pdfStyle.primaryColor}`, borderRadius: isForPDF ? '12px' : '8px', opacity: 0.4 }} />
           </>
         );
       default:
@@ -249,28 +90,28 @@ export function SlideDisplay({
     switch (template.id) {
       case 'modern':
         return {
-          title: 'text-gray-900 dark:text-white font-bold tracking-tight',
-          body: 'text-gray-700 dark:text-gray-300 font-medium'
+          title: isForPDF ? { fontSize: `${titleFontSize}px`, fontWeight: 'bold', color: template.pdfStyle.headerColor } : 'text-gray-900 dark:text-white font-bold tracking-tight',
+          body: isForPDF ? { fontSize: `${bodyFontSize}px`, lineHeight: '1.6', color: template.pdfStyle.textColor } : 'text-gray-700 dark:text-gray-300 font-medium'
         };
       case 'creative':
         return {
-          title: 'text-white font-bold tracking-wide drop-shadow-lg',
-          body: 'text-white/95 font-medium drop-shadow'
+          title: isForPDF ? { fontSize: `${titleFontSize}px`, fontWeight: 'bold', color: template.pdfStyle.headerColor } : 'text-white font-bold tracking-wide drop-shadow-lg',
+          body: isForPDF ? { fontSize: `${bodyFontSize}px`, lineHeight: '1.6', color: template.pdfStyle.textColor } : 'text-white/95 font-medium drop-shadow'
         };
       case 'minimal':
         return {
-          title: 'text-gray-900 dark:text-white font-light tracking-wide',
-          body: 'text-gray-600 dark:text-gray-400 font-normal'
+          title: isForPDF ? { fontSize: `${titleFontSize}px`, fontWeight: 'light', color: template.pdfStyle.headerColor } : 'text-gray-900 dark:text-white font-light tracking-wide',
+          body: isForPDF ? { fontSize: `${bodyFontSize}px`, lineHeight: '1.6', color: template.pdfStyle.textColor } : 'text-gray-600 dark:text-gray-400 font-normal'
         };
       case 'tech':
         return {
-          title: 'text-white font-bold tracking-tight drop-shadow-lg',
-          body: 'text-gray-100 font-medium'
+          title: isForPDF ? { fontSize: `${titleFontSize}px`, fontWeight: 'bold', color: template.pdfStyle.headerColor } : 'text-white font-bold tracking-tight drop-shadow-lg',
+          body: isForPDF ? { fontSize: `${bodyFontSize}px`, lineHeight: '1.6', color: template.pdfStyle.textColor } : 'text-gray-100 font-medium'
         };
       default:
         return {
-          title: 'text-gray-800 dark:text-gray-200 font-bold',
-          body: 'text-gray-700 dark:text-gray-300'
+          title: isForPDF ? { fontSize: `${titleFontSize}px`, fontWeight: 'bold', color: template.pdfStyle.headerColor } : 'text-gray-800 dark:text-gray-200 font-bold',
+          body: isForPDF ? { fontSize: `${bodyFontSize}px`, lineHeight: '1.6', color: template.pdfStyle.textColor } : 'text-gray-700 dark:text-gray-300'
         };
     }
   };
@@ -278,15 +119,15 @@ export function SlideDisplay({
   const getSlideNumberStyle = () => {
     switch (template.id) {
       case 'modern':
-        return 'text-blue-600 dark:text-blue-400 font-bold bg-white/80 px-2 py-1 rounded';
+        return isForPDF ? { fontSize: `${14 * fontScale}px`, color: template.pdfStyle.primaryColor, fontWeight: 'bold', background: 'rgba(255,255,255,0.8)', padding: '4px 8px', borderRadius: '4px' } : 'text-blue-600 dark:text-blue-400 font-bold bg-white/80 px-2 py-1 rounded';
       case 'creative':
-        return 'text-white font-bold bg-black/20 px-2 py-1 rounded backdrop-blur-sm';
+        return isForPDF ? { fontSize: `${14 * fontScale}px`, color: template.pdfStyle.primaryColor, fontWeight: 'bold', background: 'rgba(0,0,0,0.2)', padding: '4px 8px', borderRadius: '4px' } : 'text-white font-bold bg-black/20 px-2 py-1 rounded backdrop-blur-sm';
       case 'minimal':
-        return 'text-gray-600 dark:text-gray-400 font-medium';
+        return isForPDF ? { fontSize: `${14 * fontScale}px`, color: template.pdfStyle.accentColor, fontWeight: 'medium' } : 'text-gray-600 dark:text-gray-400 font-medium';
       case 'tech':
-        return 'text-cyan-400 font-bold bg-black/30 px-2 py-1 rounded border border-cyan-400/30';
+        return isForPDF ? { fontSize: `${14 * fontScale}px`, color: template.pdfStyle.primaryColor, fontWeight: 'bold', background: 'rgba(0,0,0,0.3)', padding: '4px 8px', borderRadius: '4px', border: `1px solid ${template.pdfStyle.primaryColor}30` } : 'text-cyan-400 font-bold bg-black/30 px-2 py-1 rounded border border-cyan-400/30';
       default:
-        return 'text-gray-600 dark:text-gray-400 font-bold';
+        return isForPDF ? { fontSize: `${14 * fontScale}px`, color: template.pdfStyle.primaryColor, fontWeight: 'bold' } : 'text-gray-600 dark:text-gray-400 font-bold';
     }
   };
 
@@ -295,35 +136,84 @@ export function SlideDisplay({
   return (
     <div 
       ref={slideRef}
-      className={`${template.style} rounded-xl p-8 flex flex-col justify-center items-center relative overflow-hidden Resizable: false; shadow-2xl`}
+      className={isForPDF ? '' : `${template.style} rounded-xl flex flex-col justify-center items-center relative overflow-hidden shadow-2xl`}
       style={{
-        width: '800px', // Fixed preview width
-        height: '600px', // Fixed preview height
+        width,
+        height,
+        background: isForPDF ? template.pdfStyle.background : undefined,
+        fontFamily: isForPDF ? 'Arial, sans-serif' : undefined,
+        boxSizing: 'border-box',
+        padding,
       }}
     >
       {/* Template-specific decorative elements */}
       {getTemplateSpecificElements()}
 
       {/* Slide number with template-specific styling */}
-      <div className={`absolute top-4 left-4 text-sm z-20 ${getSlideNumberStyle()}`}>
+      <div 
+        className={isForPDF ? '' : `absolute top-4 left-4 text-sm z-20 ${getSlideNumberStyle()}`}
+        style={isForPDF ? { 
+          position: 'absolute', 
+          top: isForPDF ? '45px' : '30px', 
+          left: isForPDF ? '45px' : '30px', 
+          zIndex: 20, 
+          ...getSlideNumberStyle() 
+        } : undefined}
+      >
         {slideNumber}/{totalSlides}
       </div>
 
       {/* Dimensions and word count (only in preview mode) */}
       {!isForPDF && (
-        <div className={`absolute bottom-4 right-4 text-sm z-20 text-gray-600 dark:text-gray-400 font-medium bg-white/80 dark:bg-black/20 px-2 py-1 rounded backdrop-blur-sm`}>
+        <div className="absolute bottom-4 right-4 text-sm z-20 text-gray-600 dark:text-gray-400 font-medium bg-white/80 dark:bg-black/20 px-2 py-1 rounded backdrop-blur-sm">
           Preview: {dimensions} | PDF: {pdfDimensions} | {wordCount} words
         </div>
       )}
 
       {/* Main content with enhanced styling */}
-      <div className="text-center max-w-full z-10 relative px-4">
-        <h1 className={`text-3xl md:text-4xl mb-6 ${textStyles.title} leading-tight`}>
+      <div 
+        className={isForPDF ? '' : 'text-center z-10 relative flex flex-col justify-center items-center'}
+        style={isForPDF ? { 
+          textAlign: 'center', 
+          maxWidth: maxContentWidth, 
+          maxHeight: maxContentHeight,
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+        } : undefined}
+      >
+        <h1 
+          className={isForPDF ? '' : `mb-6 ${textStyles.title} leading-tight`}
+          style={isForPDF ? { 
+            ...textStyles.title, 
+            marginBottom: isForPDF ? '45px' : '30px', 
+            lineHeight: '1.2',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+            hyphens: 'auto',
+            maxWidth: maxContentWidth,
+          } : undefined}
+        >
           {title}
         </h1>
         
         {bodyContent && (
-          <div className={`text-lg leading-relaxed ${textStyles.body} whitespace-pre-wrap max-w-2xl mx-auto`}>
+          <div 
+            className={isForPDF ? '' : `leading-relaxed ${textStyles.body} whitespace-pre-wrap`}
+            style={isForPDF ? { 
+              ...textStyles.body, 
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+              hyphens: 'auto',
+              maxWidth: maxContentWidth,
+              maxHeight: `calc(${maxContentHeight} - ${isForPDF ? '90px' : '60px'})`, // Subtract title space
+              overflow: 'hidden',
+            } : undefined}
+          >
             {bodyContent}
           </div>
         )}
@@ -331,16 +221,57 @@ export function SlideDisplay({
 
       {/* Template-specific bottom accent */}
       {template.id === 'modern' && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-blue-400"></div>
+        <div 
+          className={isForPDF ? '' : 'absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-blue-400'}
+          style={isForPDF ? { 
+            position: 'absolute', 
+            bottom: '0', 
+            left: '0', 
+            right: '0', 
+            height: isForPDF ? '6px' : '4px', 
+            background: `linear-gradient(90deg, ${template.pdfStyle.primaryColor}, ${template.pdfStyle.accentColor})` 
+          } : undefined}
+        />
       )}
       {template.id === 'creative' && (
-        <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600"></div>
+        <div 
+          className={isForPDF ? '' : 'absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600'}
+          style={isForPDF ? { 
+            position: 'absolute', 
+            bottom: '0', 
+            left: '0', 
+            right: '0', 
+            height: isForPDF ? '6px' : '4px', 
+            background: `linear-gradient(90deg, ${template.pdfStyle.primaryColor}, ${template.pdfStyle.accentColor})` 
+          } : undefined}
+        />
       )}
       {template.id === 'minimal' && (
-        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-400"></div>
+        <div 
+          className={isForPDF ? '' : 'absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-0.5 bg-gray-400'}
+          style={isForPDF ? { 
+            position: 'absolute', 
+            bottom: '0', 
+            left: '50%', 
+            transform: 'translateX(-50%)', 
+            width: isForPDF ? '120px' : '80px', 
+            height: isForPDF ? '3px' : '2px', 
+            background: template.pdfStyle.accentColor 
+          } : undefined}
+        />
       )}
       {template.id === 'tech' && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-emerald-400 shadow-lg shadow-cyan-400/50"></div>
+        <div 
+          className={isForPDF ? '' : 'absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 to-emerald-400 shadow-lg shadow-cyan-400/50'}
+          style={isForPDF ? { 
+            position: 'absolute', 
+            bottom: '0', 
+            left: '0', 
+            right: '0', 
+            height: isForPDF ? '6px' : '4px', 
+            background: `linear-gradient(90deg, ${template.pdfStyle.primaryColor}, ${template.pdfStyle.accentColor})` 
+          } : undefined}
+        />
       )}
     </div>
   );
