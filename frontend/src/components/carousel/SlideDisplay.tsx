@@ -21,6 +21,12 @@ export function SlideDisplay({
   const lines = content.split('\n').filter(line => line.trim());
   const title = lines[0] || `Slide ${slideNumber}`;
   const bodyContent = lines.slice(1).join('\n');
+  
+  // Calculate word count for the slide content
+  const wordCount = content.split(/\s+/).filter(word => word.trim().length > 0).length;
+  
+  // Define dimensions based on mode
+  const dimensions = isForPDF ? '800x600px' : '1080x1080px'; // Assuming square LinkedIn carousel size for preview
 
   if (isForPDF) {
     return (
@@ -135,7 +141,7 @@ export function SlideDisplay({
               height: '80px',
               border: `2px solid ${template.pdfStyle.primaryColor}`,
               borderRadius: '8px',
-              opacity: 0.4,
+              opacity: '0.4',
             }} />
           </>
         )}
@@ -311,6 +317,13 @@ export function SlideDisplay({
       <div className={`absolute top-4 left-4 text-sm z-20 ${getSlideNumberStyle()}`}>
         {slideNumber}/{totalSlides}
       </div>
+
+      {/* Dimensions and word count (only in preview mode) */}
+      {!isForPDF && (
+        <div className={`absolute bottom-4 right-4 text-sm z-20 text-gray-600 dark:text-gray-400 font-medium bg-white/80 dark:bg-black/20 px-2 py-1 rounded backdrop-blur-sm`}>
+          {dimensions} | {wordCount} words
+        </div>
+      )}
 
       {/* Main content with enhanced styling */}
       <div className="text-center max-w-full z-10 relative px-4">
