@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import { CarouselTemplate } from './types';
 
 interface SlideDisplayProps {
-  content: string;
+  content?: string; // Make content optional to handle undefined cases
   slideNumber: number;
   totalSlides: number;
   template: CarouselTemplate;
@@ -12,18 +12,23 @@ interface SlideDisplayProps {
 }
 
 export function SlideDisplay({ 
-  content, 
+  content = '', // Default to empty string if undefined
   slideNumber, 
   totalSlides, 
   template, 
   isForPDF = false 
 }: SlideDisplayProps) {
-  const lines = content.split('\n').filter(line => line.trim());
+  // Ensure content is a string; use fallback if invalid
+  const safeContent = typeof content === 'string' && content.trim().length > 0 
+    ? content 
+    : `Slide ${slideNumber}: No content provided. Please regenerate the carousel.`;
+  
+  const lines = safeContent.split('\n').filter(line => line.trim());
   const title = lines[0] || `Slide ${slideNumber}`;
   const bodyContent = lines.slice(1).join('\n');
   
   // Calculate word count for the slide content
-  const wordCount = content.split(/\s+/).filter(word => word.trim().length > 0).length;
+  const wordCount = safeContent.split(/\s+/).filter(word => word.trim().length > 0).length;
   
   // Define fixed dimensions
   const pdfDimensions = '1200x1500px'; // Fixed size for PDF export

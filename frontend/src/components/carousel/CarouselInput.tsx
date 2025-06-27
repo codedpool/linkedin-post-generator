@@ -3,8 +3,10 @@
 interface CarouselInputProps {
   inputText: string;
   pageCount: number;
+  wordCount: number;
   onInputChange: (text: string) => void;
   onPageCountChange: (count: number) => void;
+  onWordCountChange: (count: number) => void;
   onGenerate: () => void;
   isGenerating: boolean;
   selectedPrompt: string;
@@ -16,8 +18,10 @@ interface CarouselInputProps {
 export function CarouselInput({ 
   inputText, 
   pageCount,
+  wordCount,
   onInputChange, 
   onPageCountChange,
+  onWordCountChange,
   onGenerate, 
   isGenerating,
   selectedPrompt,
@@ -82,20 +86,38 @@ export function CarouselInput({
           </div>
         </div>
 
-        <div>
-          <label htmlFor="pageCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Number of Slides
-          </label>
-          <select
-            id="pageCount"
-            value={pageCount}
-            onChange={(e) => onPageCountChange(parseInt(e.target.value))}
-            className="w-full md:w-48 p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-              <option key={num} value={num}>{num} slides</option>
-            ))}
-          </select>
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          <div className="flex-1">
+            <label htmlFor="pageCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Number of Slides
+            </label>
+            <select
+              id="pageCount"
+              value={pageCount}
+              onChange={(e) => onPageCountChange(parseInt(e.target.value))}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                <option key={num} value={num}>{num} slides</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1 mt-6 md:mt-0">
+            <label htmlFor="wordCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Words per Slide
+            </label>
+            <select
+              id="wordCount"
+              value={wordCount}
+              onChange={(e) => onWordCountChange(parseInt(e.target.value))}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              {[300, 350, 400, 450, 500].map(num => (
+                <option key={num} value={num}>{num} words</option>
+              ))}
+            </select>
+          </div>
         </div>
         
         <button

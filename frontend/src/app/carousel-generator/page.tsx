@@ -14,10 +14,10 @@ const systemPrompts = {
   professional: {
     name: 'Professional',
     prompt: `You are an expert LinkedIn content creator specializing in professional carousel posts. Generate a LinkedIn carousel with exactly {pageCount} slides based on the user's input: "{userInput}". Follow these guidelines:
-- Generate exactly {pageCount} slides, each with 120-200 words, ensuring a concise yet detailed professional tone.
+- Generate exactly {pageCount} slides, each with {wordCount} words, ensuring a concise yet detailed professional tone.
 - Each slide must focus on a distinct subtopic or actionable insight directly related to "{userInput}".
 - Start each slide with an engaging question, statistic, or key fact to capture attention.
-- Include 2-3 practical tips or benefits per slide, providing clear value to the reader.
+- Include 3-4 practical tips or benefits per slide, providing clear value to the reader.
 - End each slide with a thought-provoking question or call-to-action to encourage engagement.
 - Append 3-5 relevant hashtags (e.g., Leadership CareerGrowth ProfessionalDevelopment) at the end of each slide, separated by spaces.
 - Use natural, human-like language without markdown formatting (e.g., no bold, italics, bullet points, or special characters except hashtags).
@@ -26,18 +26,18 @@ const systemPrompts = {
 - Ensure all slides are complete, with no truncated content, and strictly adhere to the topic provided.
 
 Example for 2 slides on "Effective leadership skills":
-Slide 1: What makes a leader truly effective? Empathy builds trust and strengthens team cohesion. Actively listen to your team’s concerns to understand their needs. Schedule regular one-on-ones to align on goals and address challenges. Recognize achievements publicly to boost morale and foster collaboration. These actions create a supportive environment that drives performance. Try a daily 5-minute check-in to stay connected with your team. How do you show empathy in your leadership? Leadership EmotionalIntelligence TeamBuilding ProfessionalDevelopment
+Slide 1: What makes a leader truly effective? Empathy is the cornerstone of strong leadership, fostering trust and team cohesion. Actively listen to your team’s concerns during one-on-one meetings to understand their needs and challenges. Schedule regular check-ins to align on goals and provide clarity. Recognize achievements publicly to boost morale and encourage collaboration. Create a feedback loop by asking for input on your leadership style, which research shows improves team satisfaction by 25%. Use tools like Asana to streamline task delegation and ensure everyone is on the same page. A simple daily 5-minute check-in can keep your team connected and motivated. Empathy doesn’t mean being soft—it means understanding your team’s perspective to drive results. What’s one way you show empathy in your leadership role? Leadership EmotionalIntelligence TeamBuilding ProfessionalDevelopment CareerGrowth
 ===SLIDE===
-Slide 2: Did you know 70% of employees value transparent communication? Clear communication aligns teams and boosts motivation. Share updates via weekly emails or tools like Asana to ensure clarity. Host open Q&A sessions to encourage dialogue and address concerns. Provide constructive feedback regularly to guide growth. Test video updates to connect with your team effectively. What communication strategy works best for your team? Leadership Communication CareerGrowth TeamCollaboration
+Slide 2: Did you know 70% of employees value transparent communication above all else? Clear communication aligns teams and boosts motivation. Share regular updates through weekly emails or platforms like Slack to keep everyone informed. Host open Q&A sessions to encourage dialogue and address concerns promptly. Provide constructive feedback consistently to guide professional growth. Data shows transparent leaders increase team productivity by 20%. Experiment with short video updates to add a personal touch and enhance engagement. Use a shared calendar to ensure visibility of key deadlines and meetings. Transparency builds trust, which is critical for long-term success. Try setting one clear communication goal this week, like summarizing key decisions after every meeting. What communication strategy has worked best for your team? Leadership Communication CareerGrowth TeamCollaboration Productivity
 `
   },
   humorous: {
     name: 'Humorous',
     prompt: `You are a LinkedIn content creator with a witty, engaging style. Generate a LinkedIn carousel with exactly {pageCount} slides based on the user's input: "{userInput}". Follow these guidelines:
-- Generate exactly {pageCount} slides, each with 120-200 words, using a humorous, light tone that entertains while informing.
+- Generate exactly {pageCount} slides, each with {wordCount} words, using a humorous, light tone that entertains while informing.
 - Each slide must focus on a distinct subtopic or actionable insight directly related to "{userInput}".
 - Start each slide with a funny anecdote, playful question, or humorous observation to grab attention.
-- Include 1-2 practical tips per slide, delivered with a witty twist to maintain value.
+- Include 2-3 practical tips per slide, delivered with a witty twist to maintain value.
 - End each slide with a humorous or engaging question to spark interaction.
 - Append 3 relevant hashtags (e.g., CareerHumor PersonalBranding WorkplaceFun) at the end of each slide, separated by spaces.
 - Use conversational, human-like language without markdown formatting (e.g., no bold, italics, or bullet points).
@@ -46,18 +46,18 @@ Slide 2: Did you know 70% of employees value transparent communication? Clear co
 - Ensure all slides are complete, relevant to the topic, and avoid off-topic content.
 
 Example for 2 slides on "Time management":
-Slide 1: Ever feel like your day runs away faster than a coffee break? Time management isn’t just about clocks; it’s about choices. Prioritize tasks by tackling the toughest ones when your brain’s still fresh—say, before your third coffee. Use a tool like Trello to organize your to-do list and avoid the chaos of a sticky-note explosion. A 25-minute Pomodoro sprint can work wonders for focus. What’s your funniest time-wasting habit? TimeManagement Productivity CareerHumor
+Slide 1: Ever feel like your day vanishes faster than free donuts in the office? Time management isn’t about taming clocks; it’s about making smart choices. Start your day by tackling the toughest tasks when your brain’s still buzzing—preferably before your fourth coffee. Use a tool like Trello to organize your to-do list and avoid a sticky-note apocalypse. Try the Pomodoro technique with 25-minute sprints to stay focused without daydreaming about lunch. Block off 10 minutes each morning to prioritize tasks—it’s like giving your day a game plan. If you’re constantly distracted by emails, set specific times to check them, like after lunch and before quitting time. Distraction is the enemy of progress, so keep your phone on silent during deep work. What’s the funniest time-wasting habit you’ve caught yourself doing? TimeManagement Productivity CareerHumor WorkplaceFun PersonalBranding
 ===SLIDE===
-Slide 2: Why does 4 PM feel like a deadline ambush? Planning saves you from last-minute panic. Spend 10 minutes each morning mapping your day—trust me, your future self will thank you. Group similar tasks to avoid the mental whiplash of switching gears. Try saying “no” to non-essential meetings (politely, of course). What’s the sneakiest time thief in your workday? Productivity WorkplaceFun TimeManagement
+Slide 2: Why does 4 PM feel like a deadline ambush every single day? Planning ahead saves you from last-minute chaos. Spend 10 minutes each morning mapping your day—your future self will send you a virtual high-five. Group similar tasks together to avoid the mental whiplash of jumping between emails and reports. Say “no” to non-essential meetings with a polite smile; your calendar will thank you. Use a timer app to keep meetings short and sweet—nobody needs a 90-minute debate on font choices. If you’re juggling multiple projects, color-code your tasks in a tool like Notion for clarity. Planning isn’t boring; it’s your secret weapon against the 4 PM panic attack. What’s the sneakiest time thief in your workday, and how do you fight it? Productivity WorkplaceFun TimeManagement CareerHumor WorkLifeBalance
 `
   },
   dataDriven: {
     name: 'Data-Driven',
     prompt: `You are a LinkedIn content expert focused on data and insights. Generate a LinkedIn carousel with exactly {pageCount} slides based on the user's input: "{userInput}". Follow these guidelines:
-- Generate exactly {pageCount} slides, each with 120-200 words, using a professional tone with a focus on data or industry trends.
+- Generate exactly {pageCount} slides, each with {wordCount} words, using a professional tone with a focus on data or industry trends.
 - Each slide must focus on a distinct subtopic or insight related to "{userInput}", supported by data or trends.
 - Start each slide with a specific, credible statistic or research finding to engage the reader.
-- Include 1-2 insights or actionable tips per slide, grounded in data or evidence, to inform the audience.
+- Include 2-3 insights or actionable tips per slide, grounded in data or evidence, to inform the audience.
 - End each slide with a question about the data or its implications to encourage discussion.
 - Append 3-5 relevant hashtags (e.g., DataInsights IndustryTrends Analytics) at the end of each slide, separated by spaces.
 - Use clear, evidence-based language without markdown formatting (e.g., no bold, italics, or bullet points).
@@ -66,18 +66,18 @@ Slide 2: Why does 4 PM feel like a deadline ambush? Planning saves you from last
 - Ensure all slides are complete, directly relevant to the topic, and include credible data references.
 
 Example for 2 slides on "Remote work trends":
-Slide 1: Did you know 74% of companies plan to adopt hybrid work models permanently? Flexibility is now a top employee demand. Offer options like flexible hours to boost satisfaction. Use tools like Slack to maintain team connectivity despite distance. Data shows hybrid teams report 20% higher productivity when communication is prioritized. How does your team balance flexibility and collaboration? RemoteWork WorkplaceTrends DataInsights
+Slide 1: Did you know 74% of companies plan to adopt hybrid work models permanently, according to a 2024 survey? Flexibility is now a top employee demand, with 68% citing it as a key factor in job satisfaction. Offer flexible hours to improve retention—data shows 15% lower turnover in companies with flexible policies. Use collaboration tools like Slack to maintain seamless team connectivity across time zones. Regular virtual check-ins, held twice weekly, increase engagement by 20%, per recent studies. Ensure your team has access to reliable video conferencing tools to facilitate clear communication. Hybrid work isn’t just a trend; it’s a strategic advantage for attracting top talent. Invest in training managers to lead hybrid teams effectively, focusing on clear goal-setting. How does your organization balance flexibility with collaboration to keep teams aligned? RemoteWork WorkplaceTrends DataInsights Analytics HybridWork
 ===SLIDE===
-Slide 2: Research shows 85% of remote workers feel more productive at home. But burnout is a risk—40% report longer hours. Set clear work-life boundaries by defining “off” hours. Encourage regular breaks using apps like Focus@Will to sustain energy. Data suggests structured schedules improve output by 15%. What’s your top tip for avoiding remote work burnout? RemoteWork Productivity Analytics
+Slide 2: Research shows 85% of remote workers feel more productive at home, but 40% report longer hours, risking burnout. Structured schedules reduce burnout by 15%, according to a 2023 study. Set clear work-life boundaries by defining “off” hours and encouraging employees to stick to them. Use apps like Focus@Will to promote breaks, boosting focus by 12%. Provide training on time management to help teams prioritize high-impact tasks. Data indicates regular breaks improve output by 10% over non-stop work. Offer wellness programs to support mental health, as 60% of remote workers report stress without them. Clear expectations around availability prevent overwork and maintain morale. How do you help your team avoid burnout while maintaining productivity in a remote setting? RemoteWork Productivity Analytics WorkplaceWellness DataInsights
 `
   },
   inspirational: {
     name: 'Inspirational',
     prompt: `You are a LinkedIn content creator with a motivational style. Generate a LinkedIn carousel with exactly {pageCount} slides based on the user's input: "{userInput}". Follow these guidelines:
-- Generate exactly {pageCount} slides, each with 120-200 words, using an uplifting, inspirational tone to motivate readers.
+- Generate exactly {pageCount} slides, each with {wordCount} words, using an uplifting, inspirational tone to motivate readers.
 - Each slide must focus on a distinct subtopic or lesson related to "{userInput}" to inspire action.
 - Start each slide with a personal or relatable story, anecdote, or motivational statement to connect with the reader.
-- Include 1-2 actionable insights or lessons per slide to encourage practical steps.
+- Include 2-3 actionable insights or lessons per slide to encourage practical steps.
 - End each slide with an uplifting question or call-to-action to inspire engagement.
 - Append 3-5 relevant hashtags (e.g., Motivation CareerGrowth Inspiration) at the end of each slide, separated by spaces.
 - Use heartfelt, conversational language without markdown formatting (e.g., no bold, italics, or bullet points).
@@ -86,9 +86,9 @@ Slide 2: Research shows 85% of remote workers feel more productive at home. But 
 - Ensure all slides are complete, relevant to the topic, and emotionally resonant.
 
 Example for 2 slides on "Career growth":
-Slide 1: Early in my career, I felt stuck until a mentor pushed me to step out of my comfort zone. Growth starts with small, bold steps. Take one new responsibility this month, like leading a project. Seek feedback to refine your skills—it’s like a map for progress. Commit to learning one new skill to stay competitive. What’s one bold step you’ll take today? CareerGrowth Motivation ProfessionalDevelopment
+Slide 1: Early in my career, I felt stuck in a role that didn’t challenge me, until a mentor encouraged me to take a bold step. Growth often starts with a single, courageous move. Volunteer for a new project to stretch your skills and gain visibility. Seek feedback from colleagues to refine your approach—studies show 70% of professionals grow faster with regular input. Invest 15 minutes daily in learning, whether through articles or podcasts, to stay ahead in your field. Connect with a mentor who can offer guidance and perspective. Your career is a marathon, not a sprint, so focus on consistent progress. Take one small action today, like signing up for a relevant course. What’s one bold step you’re ready to take to grow your career? CareerGrowth Motivation ProfessionalDevelopment LifelongLearning Inspiration
 ===SLIDE===
-Slide 2: I once doubted my path, but a single course changed everything. Lifelong learning fuels career success. Dedicate 10 minutes daily to reading industry articles or taking online courses. Connect with a mentor to gain perspective and guidance. Your next opportunity might be one skill away. What’s a skill you’re excited to learn? Inspiration CareerGrowth LifelongLearning
+Slide 2: I once doubted my path, but a single online course shifted my perspective and opened new doors. Lifelong learning is the key to staying relevant. Dedicate 20 minutes daily to reading industry reports or taking a course on platforms like Coursera. Join a professional network to exchange ideas and stay inspired—data shows 65% of professionals find opportunities through networking. Set a specific career goal for the next six months and break it into weekly tasks. Share your progress with a colleague to stay accountable. Every skill you learn is a step toward your next opportunity. Don’t wait for permission to grow—take ownership of your journey. What’s a skill you’re excited to learn to boost your career? Inspiration CareerGrowth LifelongLearning ProfessionalDevelopment Motivation
 `
   }
 };
@@ -96,6 +96,7 @@ Slide 2: I once doubted my path, but a single course changed everything. Lifelon
 export default function CarouselGenerator() {
   const [inputText, setInputText] = useState('');
   const [pageCount, setPageCount] = useState(5);
+  const [wordCount, setWordCount] = useState(400); // Default to 400 words
   const [generatedSlides, setGeneratedSlides] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
@@ -117,10 +118,11 @@ export default function CarouselGenerator() {
     setIsGenerating(true);
     
     try {
-      // Format the system prompt with user input and page count
+      // Format the system prompt with user input, page count, and word count
       const formattedPrompt = systemPrompt
         .replace('{userInput}', inputText.trim())
-        .replace('{pageCount}', pageCount.toString());
+        .replace('{pageCount}', pageCount.toString())
+        .replace('{wordCount}', wordCount.toString());
 
       const response = await fetch('http://localhost:5000/api/carousel', {
         method: 'POST',
@@ -130,6 +132,7 @@ export default function CarouselGenerator() {
         body: JSON.stringify({ 
           userInput: inputText.trim(),
           pageCount: pageCount,
+          wordCount: wordCount,
           systemPrompt: formattedPrompt
         }),
       });
@@ -151,13 +154,10 @@ export default function CarouselGenerator() {
     } catch (error) {
       console.error('Error generating carousel:', error);
       // Fallback to mock data if API fails
-      const mockSlides = [
-        `🚀 ${inputText}\n\nSlide 1: Introduction\n\nThis is the opening slide that introduces your main topic and hooks your audience.`,
-        `💡 Key Point #1\n\nHere's the first major insight or tip related to your topic. Make it actionable and valuable.`,
-        `📈 Key Point #2\n\nThe second important point that builds on the first. Include specific examples or data when possible.`,
-        `🎯 Key Point #3\n\nYour third main point that adds depth to your message. Keep it focused and relevant.`,
-        `✅ Conclusion\n\nWrap up with a clear call-to-action or summary. Encourage engagement and discussion.`
-      ].slice(0, pageCount);
+      const mockSlides = Array.from({ length: pageCount }, (_, i) => {
+        const slideContent = `Slide ${i + 1}: ${inputText}\n\nThis is a mock slide with approximately ${wordCount} words. `.padEnd(wordCount, 'Mock content for testing purposes. ');
+        return slideContent;
+      });
       
       setGeneratedSlides(mockSlides);
       setEditedSlides([...mockSlides]);
@@ -242,8 +242,10 @@ export default function CarouselGenerator() {
           <CarouselInput
             inputText={inputText}
             pageCount={pageCount}
+            wordCount={wordCount}
             onInputChange={setInputText}
             onPageCountChange={setPageCount}
+            onWordCountChange={setWordCount}
             onGenerate={generateCarousel}
             isGenerating={isGenerating}
             selectedPrompt={selectedPrompt}
