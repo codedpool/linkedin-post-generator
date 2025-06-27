@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 
-// Predefined system prompts for dropdown (unchanged)
+// Predefined system prompts for dropdown
 const systemPrompts = {
   professional: {
     name: 'Professional',
@@ -71,7 +71,7 @@ export default function LinkedInGenerator() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPost, setEditedPost] = useState('');
 
-  // Handle dropdown change (unchanged)
+  // Handle dropdown
   const handlePromptChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const promptKey = e.target.value;
     setSelectedPrompt(promptKey);
@@ -124,22 +124,22 @@ export default function LinkedInGenerator() {
     }
   };
 
-  // New function to handle entering edit mode
+  // handle entering edit mode
   const handleEditPost = () => {
     setIsEditing(true);
-    setEditedPost(generatedPost); // Initialize edited post with current generated post
+    setEditedPost(generatedPost); // Initialize 
   };
 
-  // New function to handle saving edits
+  //handle saving edits
   const handleSaveEdit = () => {
-    setGeneratedPost(editedPost); // Update generated post with edited content
-    setIsEditing(false); // Exit edit mode
+    setGeneratedPost(editedPost); // Update
+    setIsEditing(false); 
   };
 
-  // New function to handle canceling edits
+  // handle canceling edits
   const handleCancelEdit = () => {
-    setIsEditing(false); // Exit edit mode without saving
-    setEditedPost(''); // Clear edited post
+    setIsEditing(false); 
+    setEditedPost(''); 
   };
 
   return (
@@ -170,7 +170,7 @@ export default function LinkedInGenerator() {
             </p>
           </div>
 
-          {/* Input Section (unchanged) */}
+         { /* Input Section */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
               What is on your mind?

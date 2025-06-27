@@ -7,6 +7,10 @@ interface CarouselInputProps {
   onPageCountChange: (count: number) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  selectedPrompt: string;
+  systemPrompt: string;
+  onPromptChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onSystemPromptChange: (prompt: string) => void;
 }
 
 export function CarouselInput({ 
@@ -15,7 +19,11 @@ export function CarouselInput({
   onInputChange, 
   onPageCountChange,
   onGenerate, 
-  isGenerating 
+  isGenerating,
+  selectedPrompt,
+  systemPrompt,
+  onPromptChange,
+  onSystemPromptChange
 }: CarouselInputProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border border-gray-100 dark:border-gray-700">
@@ -26,7 +34,7 @@ export function CarouselInput({
       <div className="space-y-6">
         <div className="relative">
           <label htmlFor="topic" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Topic
+            Topic <span className="text-red-500">*</span>
           </label>
           <textarea
             id="topic"
@@ -34,9 +42,43 @@ export function CarouselInput({
             onChange={(e) => onInputChange(e.target.value)}
             placeholder="Enter your main topic or theme... (e.g., '5 tips for better productivity', 'How to build a personal brand')"
             className="w-full h-32 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+            required
           />
           <div className="absolute bottom-3 right-3 text-sm text-gray-400">
             {inputText.length}/500
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="promptSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Select System Prompt
+          </label>
+          <select
+            id="promptSelect"
+            value={selectedPrompt}
+            onChange={onPromptChange}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+          >
+            <option value="professional">Professional</option>
+            <option value="humorous">Humorous</option>
+            <option value="dataDriven">Data-Driven</option>
+            <option value="inspirational">Inspirational</option>
+          </select>
+        </div>
+
+        <div className="relative">
+          <label htmlFor="systemPrompt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            System Prompt <span className="text-gray-400">(Optional Edit)</span>
+          </label>
+          <textarea
+            id="systemPrompt"
+            value={systemPrompt}
+            onChange={(e) => onSystemPromptChange(e.target.value)}
+            placeholder="Edit the system prompt to customize the tone, style, or instructions for the carousel..."
+            className="w-full h-48 p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+          />
+          <div className="absolute bottom-3 right-3 text-sm text-gray-400">
+            {systemPrompt.length}/1000
           </div>
         </div>
 
